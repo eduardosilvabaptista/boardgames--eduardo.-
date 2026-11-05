@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#18252d">
+<meta name="description" content="Diário pessoal de jogos de tabuleiro, partidas, jogadores e rankings.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>Boardgames Eduardo</title>
+<style>
+:root{--bg:#f4f6f5;--card:#fff;--ink:#18252d;--muted:#68777e;--line:#e0e6e4;--accent:#e2a64b;--green:#24785d;--red:#b94b45;--shadow:0 5px 22px #18252d0d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding-bottom:86px}
+header{background:var(--ink);color:white;padding:22px 18px 18px;border-radius:0 0 24px 24px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}.brand{font-size:21px;font-weight:800;letter-spacing:-.5px}.brand span{color:var(--accent)}.sub{color:#c4d0d3;font-size:12px;margin-top:4px}
+.wrap{max-width:760px;margin:auto;padding:16px}.page{display:none}.page.active{display:block}
+h2{font-size:20px;margin:8px 0 14px;letter-spacing:-.4px}h3{font-size:15px;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stat,.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow)}
+.stat strong{display:block;font-size:27px;letter-spacing:-1px}.stat small,.muted{color:var(--muted);font-size:12px}
+.card{margin:10px 0}.row{display:flex;align-items:center;gap:12px}.between{justify-content:space-between}.grow{flex:1;min-width:0}
+button,.btn{border:0;border-radius:12px;background:var(--ink);color:white;padding:12px 14px;font-weight:700;font-size:14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+button.secondary,.btn.secondary{background:#edf1ef;color:var(--ink)}button.gold{background:var(--accent);color:#261d10}button.danger{background:#fff0ee;color:var(--red)}button:disabled{opacity:.45}
+input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;background:white;color:var(--ink);font:inherit;margin:5px 0 12px}
+label{font-size:12px;font-weight:700;color:#46565d;display:block;margin-top:7px}
+nav{position:fixed;z-index:5;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 3px calc(8px + env(safe-area-inset-bottom));box-shadow:0 -4px 20px #0000000a}
+nav button{background:transparent;color:var(--muted);padding:7px 4px;display:flex;flex-direction:column;font-size:10px;gap:3px;flex:1}
+nav button b{font-size:19px;font-weight:500}nav button.active{color:var(--green)}
+.pill{display:inline-block;border-radius:30px;background:#edf1ef;padding:4px 9px;font-size:11px;color:#40535b}
+.game{display:flex;gap:12px;align-items:center}.cover{width:62px;height:76px;border-radius:9px;background:#e9eeeb;object-fit:cover;display:grid;place-items:center;font-size:25px;flex:none}
+.player-row{display:grid;grid-template-columns:1fr 90px 34px;gap:7px;align-items:center;margin:7px 0}
+.player-row input,.player-row select{margin:0;padding:10px 8px;min-width:0}.player-row button{padding:8px;background:#fff0ee;color:var(--red)}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:left;padding:9px 6px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-size:11px}
+.bar{height:8px;border-radius:9px;background:#edf1ef;overflow:hidden}.bar i{display:block;height:100%;background:var(--green);border-radius:9px}
+.empty{text-align:center;padding:24px 12px;color:var(--muted)}.empty strong{display:block;color:var(--ink);margin:8px}
+.toast{position:fixed;bottom:85px;left:50%;transform:translateX(-50%);background:#18252d;color:white;padding:10px 15px;border-radius:20px;font-size:13px;display:none;z-index:9;max-width:90%;text-align:center}
+.smallbtn{padding:7px 9px;font-size:11px}.sectionhead{display:flex;align-items:center;justify-content:space-between;margin-top:18px}
+@media(min-width:600px){.grid{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header><div class="top"><div><div class="brand">🎲 Boardgames <span>Eduardo</span></div><div class="sub">O teu diário de jogos, amigos e conquistas</div></div><span class="pill" style="background:#34454d;color:#fff">BGG · calhorda</span></div></header>
+<main class="wrap">
+<section id="dashboard" class="page active">
+ <h2>Resumo da tua mesa</h2>
+ <div class="grid" id="stats"></div>
+ <div class="sectionhead"><h3>Atividade recente</h3><button class="smallbtn gold" onclick="showPage('session')">＋ Nova partida</button></div>
+ <div id="recent"></div>
+ <div class="card"><h3>🏆 Top jogadores</h3><div id="topPlayers"></div></div>
+</section>
+<section id="library" class="page">
+ <div class="sectionhead"><h2>A minha coleção</h2><button class="smallbtn gold" onclick="openGameForm()">＋ Jogo</button></div>
+ <input id="gameSearch" placeholder="Pesquisar na tua coleção…" oninput="renderGames()">
+ <div id="gamesList"></div>
+ <div id="gameForm" class="card" style="display:none">
+  <h3 id="gameFormTitle">Adicionar jogo</h3>
+  <label>Nome do jogo *</label><input id="gName" placeholder="Ex.: Wingspan">
+  <label>BGG ID (opcional)</label><input id="gBgg" inputmode="numeric" placeholder="Ex.: 266192">
+  <div class="row"><button class="secondary" onclick="searchBGG()">Pesquisar no BGG ↗</button><button class="secondary" onclick="importBGG()">Tentar importar dados</button></div>
+  <label>Ano de publicação</label><input id="gYear" type="number" placeholder="2020">
+  <label>Jogadores (mín.–máx.)</label><input id="gPlayers" placeholder="1–5">
+  <label>Duração (minutos)</label><input id="gTime" type="number" placeholder="60">
+  <label>Complexidade BGG (opcional)</label><input id="gWeight" type="number" step=".01" placeholder="2.40">
+  <label>URL da imagem da capa (opcional)</label><input id="gImage" placeholder="https://…">
+  <label>Notas pessoais</label><textarea id="gNotes" rows="2" placeholder="Edição, expansões, etc."></textarea>
+  <div class="row"><button onclick="saveGame()">Guardar jogo</button><button class="secondary" onclick="closeGameForm()">Cancelar</button></div>
+  <p class="muted">A pesquisa abre o BGG numa nova página. A importação automática depende de o BGG permitir o pedido direto pelo navegador; podes sempre preencher os dados manualmente.</p>
+ </div>
+</section>
+<section id="session" class="page">
+ <h2>Registar partida</h2>
+ <div class="card">
+  <label>Jogo *</label><select id="sGame"><option value="">Escolhe um jogo da coleção</option></select>
+  <label>Data</label><input id="sDate" type="date">
+  <label>Local (opcional)</label><input id="sPlace" placeholder="Ex.: Casa do João">
+  <label>Participantes e classificação</label>
+  <div id="participants"></div>
+  <button class="secondary" onclick="addParticipant()">＋ Adicionar jogador</button>
+  <label>Notas da partida</label><textarea id="sNotes" rows="2" placeholder="Resultado, momentos memoráveis…"></textarea>
+  <button class="gold" style="width:100%;margin-top:8px" onclick="saveSession()">Guardar partida e atualizar ranking</button>
+ </div>
+ <p class="muted">Pontuação: numa partida com N jogadores, o 1.º recebe N pontos, o 2.º N−1, até ao último com 1 ponto. Em caso de empate, os pontos das posições ocupadas são divididos igualmente.</p>
+</section>
+<section id="ranking" class="page">
+ <h2>🏆 Ranking</h2>
+ <div class="row"><select id="rankFilter" onchange="renderRanking()"><option value="all">Todos os jogos</option><option value="year">Este ano</option></select></div>
+ <div class="card" id="rankingList"></div>
+ <div class="card"><h3>Ranking por jogo</h3><select id="rankGame" onchange="renderGameRanking()"><option value="all">Todos os jogos</option></select><div id="gameRanking"></div></div>
+</section>
+<section id="history" class="page">
+ <h2>Histórico de partidas</h2>
+ <input id="historySearch" placeholder="Pesquisar jogo ou jogador…" oninput="renderHistory()">
+ <div id="historyList"></div>
+</section>
+</main>
+<nav>
+ <button class="active" data-page="dashboard" onclick="showPage('dashboard')"><b>⌂</b>Início</button>
+ <button data-page="library" onclick="showPage('library')"><b>▣</b>Coleção</button>
+ <button data-page="session" onclick="showPage('session')"><b>＋</b>Partida</button>
+ <button data-page="ranking" onclick="showPage('ranking')"><b>♛</b>Ranking</button>
+ <button data-page="history" onclick="showPage('history')"><b>☷</b>Histórico</button>
+</nav>
+<div class="toast" id="toast"></div>
+<script>
+const KEY='boardgames-eduardo-v1';
+let db=JSON.parse(localStorage.getItem(KEY)||'{"games":[],"sessions":[]}');
+let editingGame=null, participantCount=0;
+const $=id=>document.getElementById(id);
+const save=()=>localStorage.setItem(KEY,JSON.stringify(db));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(s){let t=$('toast');t.textContent=s;t.style.display='block';setTimeout(()=>t.style.display='none',2400)}
+function showPage(p){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===p));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===p));renderAll();if(p==='session')refreshGameSelect()}
+function renderAll(){renderDashboard();renderGames();renderHistory();renderRanking();refreshGameSelect()}
+function openGameForm(id=null){editingGame=id;let g=db.games.find(x=>x.id===id)||{};$('gameForm').style.display='block';$('gameFormTitle').textContent=id?'Editar jogo':'Adicionar jogo';$('gName').value=g.name||'';$('gBgg').value=g.bgg||'';$('gYear').value=g.year||'';$('gPlayers').value=g.players||'';$('gTime').value=g.time||'';$('gWeight').value=g.weight||'';$('gImage').value=g.image||'';$('gNotes').value=g.notes||'';$('gName').focus()}
+function closeGameForm(){$('gameForm').style.display='none';editingGame=null}
+function saveGame(){let name=$('gName').value.trim();if(!name){toast('Indica o nome do jogo.');return}let obj={id:editingGame||crypto.randomUUID(),name,bgg:$('gBgg').value.trim(),year:$('gYear').value,players:$('gPlayers').value,time:$('gTime').value,weight:$('gWeight').value,image:$('gImage').value.trim(),notes:$('gNotes').value.trim()};if(editingGame)db.games=db.games.map(x=>x.id===editingGame?obj:x);else db.games.push(obj);save();closeGameForm();renderAll();toast('Jogo guardado na coleção!')}
+function searchBGG(){let q=$('gName').value.trim();if(!q){toast('Escreve primeiro o nome do jogo.');return}window.open('https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q='+encodeURIComponent(q),'_blank')}
+async function importBGG(){let id=$('gBgg').value.trim();if(!/^\d+$/.test(id)){toast('Introduz primeiro o BGG ID.');return}try{let r=await fetch('https://boardgamegeek.com/xmlapi2/thing?id='+id+'&stats=1');if(!r.ok)throw Error('BGG indisponível');let xml=new DOMParser().parseFromString(await r.text(),'text/xml');let item=xml.querySelector('item');if(!item)throw Error('Jogo não encontrado');let val=(sel)=>item.querySelector(sel)?.getAttribute('value')||'';$('gName').value=item.querySelector('name[type="primary"]')?.getAttribute('value')||$('gName').value;$('gYear').value=val('yearpublished');$('gPlayers').value=val('minplayers')+'–'+val('maxplayers');$('gTime').value=val('playingtime');$('gWeight').value=item.querySelector('statistics ratings averageweight')?.getAttribute('value')||'';$('gImage').value=item.querySelector('image')?.textContent||'';toast('Dados BGG importados!')}catch(e){toast('Não foi possível importar automaticamente. Usa Pesquisar no BGG e preenche os dados.');}}
+function renderGames(){let q=($('gameSearch')?.value||'').toLowerCase();let gs=db.games.filter(g=>g.name.toLowerCase().includes(q));$('gamesList').innerHTML=gs.length?gs.map(g=>`<div class="card game"><img class="cover" src="${esc(g.image||'')}" onerror="this.outerHTML='<div class=&quot;cover&quot;>🎲</div>'"><div class="grow"><b>${esc(g.name)}</b><div class="muted">${esc(g.year||'Ano desconhecido')} · ${esc(g.players||'Jogadores n/d')} · ${g.time?esc(g.time)+' min':'Duração n/d'}</div><div class="row" style="margin-top:7px"><a class="pill" target="_blank" href="https://boardgamegeek.com/boardgame/${esc(g.bgg||'')}">BGG ↗</a><button class="secondary smallbtn" onclick="openGameForm('${g.id}')">Editar</button><button class="danger smallbtn" onclick="deleteGame('${g.id}')">Apagar</button></div></div></div>`).join(''):'<div class="empty">🎲<strong>A coleção está vazia</strong>Adiciona o teu primeiro jogo.</div>'}
+function deleteGame(id){if(!confirm('Apagar este jogo da coleção? O histórico das partidas mantém-se.'))return;db.games=db.games.filter(g=>g.id!==id);save();renderAll()}
+function refreshGameSelect(){let s=$('sGame');if(!s)return;let v=s.value;s.innerHTML='<option value="">Escolhe um jogo da coleção</option>'+db.games.map(g=>`<option value="${g.id}">${esc(g.name)}</option>`).join('');if(db.games.some(g=>g.id===v))s.value=v}
+function addParticipant(name='',rank=''){participantCount++;let d=document.createElement('div');d.className='player-row';d.innerHTML=`<input class="pname" placeholder="Nome do jogador" value="${esc(name)}"><select class="prank"><option value="">Lugar</option>${Array.from({length:12},(_,i)=>`<option value="${i+1}" ${rank==i+1?'selected':''}>${i+1}.º</option>`).join('')}</select><button type="button" onclick="this.parentElement.remove()">×</button>`;$('participants').appendChild(d)}
+function saveSession(){let gameId=$('sGame').value;if(!gameId){toast('Escolhe um jogo.');return}let rows=[...$('participants').querySelectorAll('.player-row')].map(r=>({name:r.querySelector('.pname').value.trim(),rank:Number(r.querySelector('.prank').value)})).filter(p=>p.name);if(rows.length<2){toast('Adiciona pelo menos dois jogadores.');return}if(rows.some(p=>!p.rank)||rows.some(p=>p.rank>rows.length)){toast('Atribui uma classificação válida a cada jogador.');return}let ranks=[...new Set(rows.map(p=>p.rank))].sort((a,b)=>a-b);let expected=1;for(let r of ranks){let tied=rows.filter(p=>p.rank===r).length;if(r!==expected){toast('As posições devem ser consecutivas, considerando os empates.');return}expected+=tied}let n=rows.length;rows=rows.map(p=>{let tied=rows.filter(x=>x.rank===p.rank).length;let points=Array.from({length:tied},(_,i)=>n-(p.rank+i)+1).reduce((a,b)=>a+b,0)/tied;return {...p,points}});db.sessions.unshift({id:crypto.randomUUID(),gameId,date:$('sDate').value||new Date().toISOString().slice(0,10),place:$('sPlace').value,notes:$('sNotes').value,players:rows});save();$('participants').innerHTML='';addParticipant();addParticipant();$('sPlace').value='';$('sNotes').value='';toast('Partida guardada! Ranking atualizado.');showPage('ranking')}
+function getStats(yearOnly=false,gameId='all'){let ss=db.sessions.filter(s=>(!yearOnly||s.date.startsWith(String(new Date().getFullYear())))&&(gameId==='all'||s.gameId===gameId));let all=ss.flatMap(s=>s.players.map(p=>({...p,gameId:s.gameId,date:s.date})));let map={};all.forEach(p=>{let x=map[p.name]||{name:p.name,points:0,plays:0,wins:0,podium:0};x.points+=p.points;x.plays++;if(p.rank===1)x.wins++;if(p.rank<=3)x.podium++;map[p.name]=x});return {ss,all,players:Object.values(map).sort((a,b)=>b.points-a.points||b.wins-a.wins)}}
+function renderDashboard(){let s=getStats(),hours=s.ss.length;let people=new Set(s.all.map(p=>p.name)).size;$('stats').innerHTML=[['🎲',s.ss.length,'Partidas'],['▣',db.games.length,'Jogos na coleção'],['👥',people,'Jogadores'],['🏆',s.players[0]?.points.toFixed(1)||'0','Pontos do líder']].map(x=>`<div class="stat"><span>${x[0]}</span><strong>${x[1]}</strong><small>${x[2]}</small></div>`).join('');$('recent').innerHTML=s.ss.slice(0,3).map(sessionCard).join('')||'<div class="empty">Ainda não há partidas registadas.</div>';$('topPlayers').innerHTML=s.players.slice(0,5).map((p,i)=>`<div class="row between" style="padding:7px 0"><span>${['🥇','🥈','🥉'][i]||'♟️'} ${esc(p.name)}</span><b>${p.points.toFixed(1)} pts</b></div>`).join('')||'<span class="muted">O ranking aparecerá aqui.</span>'}
+function gameName(id){return db.games.find(g=>g.id===id)?.name||'Jogo removido'}
+function sessionCard(s){return `<div class="card"><div class="row between"><b>${esc(gameName(s.gameId))}</b><span class="pill">${esc(s.date)}</span></div><div class="muted">${s.players.map(p=>`${esc(p.name)} · ${p.rank}.º (${p.points.toFixed(1)} pts)`).join(' | ')}</div>${s.place?`<div class="muted">📍 ${esc(s.place)}</div>`:''}</div>`}
+function renderHistory(){let q=($('historySearch')?.value||'').toLowerCase();let ss=db.sessions.filter(s=>(gameName(s.gameId)+' '+s.players.map(p=>p.name).join(' ')).toLowerCase().includes(q));$('historyList').innerHTML=ss.map(s=>sessionCard(s)+`<div style="text-align:right;margin-top:-5px"><button class="danger smallbtn" onclick="deleteSession('${s.id}')">Apagar partida</button></div>`).join('')||'<div class="empty">Ainda não existem partidas.</div>'}
+function deleteSession(id){if(!confirm('Apagar esta partida e recalcular o ranking?'))return;db.sessions=db.sessions.filter(s=>s.id!==id);save();renderAll()}
+function renderRanking(){let year=$('rankFilter')?.value==='year';let data=getStats(year);$('rankingList').innerHTML=data.players.length?`<table><thead><tr><th>#</th><th>Jogador</th><th>Pts</th><th>Jogos</th><th>Vit.</th></tr></thead><tbody>${data.players.map((p,i)=>`<tr><td>${i+1}</td><td><b>${esc(p.name)}</b></td><td>${p.points.toFixed(1)}</td><td>${p.plays}</td><td>${p.wins}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">O ranking será criado após as primeiras partidas.</div>';let sel=$('rankGame');if(sel){let v=sel.value;sel.innerHTML='<option value="all">Todos os jogos</option>'+db.games.map(g=>`<option value="${g.id}">${esc(g.name)}</option>`).join('');sel.value=[...sel.options].some(o=>o.value===v)?v:'all';renderGameRanking()}}
+function renderGameRanking(){let id=$('rankGame')?.value||'all';let d=getStats($('rankFilter')?.value==='year',id);$('gameRanking').innerHTML=d.players.map((p,i)=>`<div class="row between" style="padding:7px 0"><span>${i+1}. ${esc(p.name)}</span><b>${p.points.toFixed(1)} pts</b></div>`).join('')||'<p class="muted">Sem resultados para este filtro.</p>'}
+$('sDate').value=new Date().toISOString().slice(0,10);addParticipant();addParticipant();renderAll();
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>
